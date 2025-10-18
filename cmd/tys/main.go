@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 
 	"github.com/ZygmuntJakub/1000/internal/engine"
@@ -16,6 +17,13 @@ func makeDeck() []engine.Card {
 		}
 	}
 	return deck
+}
+
+func shuffleDeck(deck []engine.Card) {
+	for i := range deck {
+		j := rand.Intn(i + 1)
+		deck[i], deck[j] = deck[j], deck[i]
+	}
 }
 
 func main() {
@@ -33,6 +41,7 @@ func main() {
 
 	// Deterministic deal (same as tests basic split):
 	deck := makeDeck()
+	shuffleDeck(deck)
 	h1 := append([]engine.Card{}, deck[:10]...)
 	h2 := append([]engine.Card{}, deck[10:20]...)
 	m1 := append([]engine.Card{}, deck[20:22]...)
@@ -77,10 +86,6 @@ func main() {
 	// Auto-play the rest of the hand:
 	trick := 1
 	var lastTrump *engine.Suit
-	if g.Play.Trump != nil {
-		tmp := *g.Play.Trump
-		lastTrump = &tmp
-	}
 	for g.Phase == engine.PhasePlay {
 		leader := g.Play.CurrentTrick.Leader
 		fmt.Printf("Trick %d: leader=%s\n", trick, leader)
