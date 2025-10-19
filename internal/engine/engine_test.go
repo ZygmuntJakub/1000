@@ -27,10 +27,10 @@ func TestEdgeCases_TableDriven(t *testing.T) {
 				g := NewGame(GameParams{Players: players}, players[0], players, nil)
 				deck := makeDeck()
 				_ = g.SetDealtCards(map[PlayerID][]Card{"P1": deck[:10], "P2": deck[10:20]}, [][]Card{deck[20:22], deck[22:24]})
-				if err := g.PlaceBid("P2", 100); err != nil {
+				if err := g.PlaceBid("P2", 110); err != nil {
 					t.Fatalf("seed bid: %v", err)
 				}
-				if err := g.PlaceBid("P1", 105); err == nil {
+				if err := g.PlaceBid("P1", 115); err == nil {
 					t.Fatalf("expected invalid small raise")
 				}
 			},
@@ -69,7 +69,7 @@ func TestEdgeCases_TableDriven(t *testing.T) {
 				g := NewGame(GameParams{Players: players}, players[0], players, nil)
 				deck := makeDeck()
 				_ = g.SetDealtCards(map[PlayerID][]Card{"P1": deck[:10], "P2": deck[10:20]}, [][]Card{deck[20:22], deck[22:24]})
-				_ = g.PlaceBid("P2", 100)
+				_ = g.PlaceBid("P2", 110)
 				_ = g.PlaceBid("P1", 0)
 				if err := g.ChooseMusik("P2", 0); err != nil {
 					t.Fatalf("musik: %v", err)
@@ -107,7 +107,7 @@ func TestEdgeCases_TableDriven(t *testing.T) {
 				if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, musiks); err != nil {
 					t.Fatalf("deal: %v", err)
 				}
-				_ = g.PlaceBid("P2", 100)
+				_ = g.PlaceBid("P2", 110)
 				_ = g.PlaceBid("P1", 0)
 				if err := g.ChooseMusik("P2", 0); err != nil {
 					t.Fatalf("musik: %v", err)
@@ -138,7 +138,7 @@ func TestEdgeCases_TableDriven(t *testing.T) {
 				if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, musiks); err != nil {
 					t.Fatalf("deal: %v", err)
 				}
-				_ = g.PlaceBid("P2", 100)
+				_ = g.PlaceBid("P2", 110)
 				_ = g.PlaceBid("P1", 0)
 				if err := g.ChooseMusik("P2", 0); err != nil {
 					t.Fatalf("musik: %v", err)
@@ -232,7 +232,7 @@ func TestTrumpLedMustFollowTrump(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -288,7 +288,7 @@ func TestIllegalMarriageCases(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -331,7 +331,7 @@ func TestPlayNotInHandError(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{[]Card{deck[20], deck[21]}, []Card{deck[22], deck[23]}}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -392,6 +392,30 @@ func TestLegalPlaysWhenVoid(t *testing.T) {
 	}
 }
 
+func TestFirstLeaderAutomaticallyBids100(t *testing.T) {
+	players := []PlayerID{"P1", "P2"}
+	g := NewGame(GameParams{Players: players}, players[0], players, nil)
+	deck := makeDeck()
+	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": deck[:10], "P2": deck[10:20]}, [][]Card{[]Card{deck[20], deck[21]}, []Card{deck[22], deck[23]}}); err != nil {
+		t.Fatalf("SetDealtCards: %v", err)
+	}
+	if g.Auction.CurrentLeader != players[1] {
+		t.Fatalf("expected first bid to be from %s", players[1])
+	}
+	if g.Dealer != players[0] {
+		t.Fatalf("expected dealer to be %s", players[0])
+	}
+	if err := g.PlaceBid("P2", 0); err != nil {
+		t.Fatalf("p2 pass: %v", err)
+	}
+	if g.Auction.Bids[0].Value != 100 {
+		t.Fatalf("expected first bid to be 100")
+	}
+	if g.Auction.Bids[0].Player != players[0] {
+		t.Fatalf("expected first bid to be from %s", players[0])
+	}
+}
+
 func TestTrickResolutionNoTrump(t *testing.T) {
 	players := []PlayerID{"P1", "P2"}
 	g := NewGame(GameParams{Players: players}, players[0], players, nil)
@@ -405,7 +429,7 @@ func TestTrickResolutionNoTrump(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -453,7 +477,7 @@ func TestTrickResolutionWithTrump(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -506,18 +530,18 @@ func TestLegalHelpers(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	// Auction leader should be P2, legal bids are pass (0) and next (100)
+	// Auction leader should be P2, legal bids are pass (0) and next (110)
 	bids := g.LegalBids("P2")
-	if len(bids) != 2 || bids[0] != 0 || bids[1] != 100 {
+	if len(bids) != 2 || bids[0] != 0 || bids[1] != 110 {
 		t.Fatalf("unexpected LegalBids: %v", bids)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
-	// Now P1 turn; next legal bid should be 110
+	// Now P1 turn; next legal bid should be 120
 	bids = g.LegalBids("P1")
-	if len(bids) != 2 || bids[1] != 110 {
-		t.Fatalf("expected next bid 110, got %v", bids)
+	if len(bids) != 2 || bids[1] != 120 {
+		t.Fatalf("expected next bid 120, got %v", bids)
 	}
 
 	// Start play to check LegalPlays
@@ -570,8 +594,8 @@ func TestAuctionFlow2P(t *testing.T) {
 		t.Fatalf("expected P2 to lead auction")
 	}
 
-	// P2 bids 100, P1 passes -> P2 becomes declarer and PhaseTalonExchange
-	if err := g.PlaceBid("P2", 100); err != nil {
+	// P2 bids 110, P1 passes -> P2 becomes declarer and PhaseTalonExchange
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid error: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -597,7 +621,7 @@ func TestMusikChooseDiscardAndStartPlay(t *testing.T) {
 		t.Fatalf("SetDealtCards error: %v", err)
 	}
 	// Make P2 declarer
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid error: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -634,7 +658,7 @@ func TestFollowSuitEnforced(t *testing.T) {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
 	// Make P2 declarer and start play
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {
@@ -678,7 +702,7 @@ func TestMarriageSetsTrumpAndScores(t *testing.T) {
 	if err := g.SetDealtCards(map[PlayerID][]Card{"P1": h1, "P2": h2}, [][]Card{m1, m2}); err != nil {
 		t.Fatalf("SetDealtCards: %v", err)
 	}
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 110); err != nil {
 		t.Fatalf("bid: %v", err)
 	}
 	if err := g.PlaceBid("P1", 0); err != nil {

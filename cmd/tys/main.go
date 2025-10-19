@@ -52,32 +52,27 @@ func main() {
 	}
 	fmt.Printf("Deal set. Phase=%v, Auction leader=%s\n", g.Phase, g.Auction.CurrentLeader)
 
-	// Auction: P2 bids 100, P1 passes
-	if err := g.PlaceBid("P2", 100); err != nil {
+	if err := g.PlaceBid("P2", 0); err != nil {
 		fmt.Printf("bid error: %v\n", err)
 		return
 	}
-	if err := g.PlaceBid("P1", 0); err != nil {
-		fmt.Printf("pass error: %v\n", err)
-		return
-	}
-	fmt.Printf("Auction done. Declarer=%s, Phase=%v\n", *g.Declarer, g.Phase)
+	fmt.Printf("Auction done. Declarer=%s, Value=%d Phase=%v\n", *g.Declarer, g.Auction.Bids[0].Value, g.Phase)
 
 	// Declarer chooses first musik, discard two smallest by rank (stable)
-	if err := g.ChooseMusik("P2", 0); err != nil {
+	if err := g.ChooseMusik("P1", 0); err != nil {
 		fmt.Printf("choose musik: %v\n", err)
 		return
 	}
 	// Choose two discard cards deterministically (lowest two ranks, by suit then rank)
-	p2 := append([]engine.Card{}, g.Deal.Hands["P2"]...)
-	sort.Slice(p2, func(i, j int) bool {
-		if p2[i].Suit != p2[j].Suit {
-			return p2[i].Suit < p2[j].Suit
+	p1 := append([]engine.Card{}, g.Deal.Hands["P1"]...)
+	sort.Slice(p1, func(i, j int) bool {
+		if p1[i].Suit != p1[j].Suit {
+			return p1[i].Suit < p1[j].Suit
 		}
-		return p2[i].Rank < p2[j].Rank
+		return p1[i].Rank < p1[j].Rank
 	})
-	disc := []engine.Card{p2[0], p2[1]}
-	if err := g.Discard("P2", disc); err != nil {
+	disc := []engine.Card{p1[0], p1[1]}
+	if err := g.Discard("P1", disc); err != nil {
 		fmt.Printf("discard: %v\n", err)
 		return
 	}

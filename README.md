@@ -3,12 +3,11 @@
 Todo:
 
 Engine:
-- [ ] First leader automatically bids 100
-- [ ] 
+- [x] First leader automatically bids 100
+- [ ] Bot player
 
 Web:
-- [ ] Setup REST API for game state
-- [ ] Simulate game
+- [ ] Setup web interface
 
 Infrastructure:
 - [ ] Dockerize

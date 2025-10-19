@@ -42,7 +42,7 @@ func NewGame(params GameParams, dealer PlayerID, players []PlayerID, cumulative 
 		}
 	}
 	gs.Phase = PhaseDeal
-	gs.Auction = AuctionState{ActivePlayers: append([]PlayerID{}, players...), CurrentLeader: nextPlayer(players, dealer), MinRaise: gs.Params.MinRaise}
+	gs.Auction = AuctionState{ActivePlayers: append([]PlayerID{}, players...), CurrentLeader: nextPlayer(players, dealer), MinRaise: gs.Params.MinRaise, Bids: []AuctionBid{{Player: dealer, Value: gs.Params.MinBid, Pass: false}}}
 	return gs
 }
 
