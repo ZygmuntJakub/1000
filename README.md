@@ -4,7 +4,7 @@ Todo:
 
 Engine:
 - [x] First leader automatically bids 100
-- [ ] Bot player
+- [x] Random Bot player
 
 Web:
 - [ ] Setup web interface

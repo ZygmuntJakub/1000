@@ -134,12 +134,13 @@ type ScoreState struct {
 
 // GameParams parameterizes game rules.
 type GameParams struct {
-	Players     []PlayerID
-	MinBid      int
-	MinRaise    int
-	HandCards   int
-	MusiksCount int
-	MusikSize   int
+	Players       []PlayerID
+	MinBid        int
+	MinRaise      int
+	HandCards     int
+	MusiksCount   int
+	MusikSize     int
+	MaxGamePoints int
 }
 
 // GameState is the root state container.

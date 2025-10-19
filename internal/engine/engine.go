@@ -25,6 +25,9 @@ func NewGame(params GameParams, dealer PlayerID, players []PlayerID, cumulative 
 	if params.MusikSize == 0 {
 		params.MusikSize = 2
 	}
+	if params.MaxGamePoints == 0 {
+		params.MaxGamePoints = 1000
+	}
 	gs := &GameState{
 		Phase:  PhaseInit,
 		Params: params,
@@ -215,7 +218,7 @@ func (g *GameState) PlayCard(player PlayerID, card Card, announceMarriage bool) 
 	if g.Phase != PhasePlay {
 		return PhaseError("not in play phase")
 	}
-	if player != g.currentTurnPlayer() {
+	if player != g.CurrentTurnPlayer() {
 		return fmt.Errorf("not %s's turn", player)
 	}
 	hand := g.Deal.Hands[player]
@@ -264,8 +267,8 @@ func (g *GameState) PlayCard(player PlayerID, card Card, announceMarriage bool) 
 	return nil
 }
 
-// currentTurnPlayer returns the player whose turn it is within the current trick.
-func (g *GameState) currentTurnPlayer() PlayerID {
+// CurrentTurnPlayer returns the player whose turn it is within the current trick.
+func (g *GameState) CurrentTurnPlayer() PlayerID {
 	leader := g.Play.CurrentTrick.Leader
 	// find leader index
 	leaderIdx := 0
@@ -467,4 +470,13 @@ func (g *GameState) LegalPlays(player PlayerID) []Card {
 	}
 	// No led suit in hand: free to play any card (including trump); no overtrump requirement
 	return append([]Card(nil), hand...)
+}
+
+func (g *GameState) IsWinningGame() (bool, PlayerID) {
+	for playerId, points := range g.Scores.Cumulative {
+		if points >= g.Params.MaxGamePoints {
+			return true, playerId
+		}
+	}
+	return false, ""
 }
